@@ -180,19 +180,22 @@ class BlumTod:
         play = res.json()["playPasses"]
         self.log(f"{hijau}you have {putih}{play}{hijau} game ticket")
         for i in range(play):
-            res = self.http(url_play, headers, "")
-            game_id = res.json()["gameId"]
-            self.countdown(30)
-            point = random.randint(self.MIN_WIN, self.MAX_WIN)
-            data = json.dumps({"gameId": game_id, "points": point})
-            res = self.http(url_claim, headers, data)
-            if "OK" in res.text:
-                self.log(f"{hijau}success earn {putih}{point}{hijau} from game !")
-                self.get_balance(access_token, only_show_balance=True)
-                continue
+            try:
+                res = self.http(url_play, headers, "")
+                game_id = res.json()["gameId"]
+                self.countdown(30)
+                point = random.randint(self.MIN_WIN, self.MAX_WIN)
+                data = json.dumps({"gameId": game_id, "points": point})
+                res = self.http(url_claim, headers, data)
+                if "OK" in res.text:
+                    self.log(f"{hijau}success earn {putih}{point}{hijau} from game !")
+                    self.get_balance(access_token, only_show_balance=True)
+                    continue
 
-            self.log(f"{merah}failed earn {putih}{point}{merah} from game !")
-            continue
+                self.log(f"{merah}failed earn {putih}{point}{merah} from game !")
+                continue
+            except KeyError:
+                print("KeyError: 'request blum json has error")
 
     def data_parsing(self, data):
         return {k:v[0] for k,v in parse_qs(data).items()}
