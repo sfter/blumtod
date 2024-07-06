@@ -335,43 +335,46 @@ class BlumTod:
         while True:
             list_countdown = []
             for no, data in enumerate(datas):
-                self.log(f"{hijau}account number - {putih}{no + 1}")
-                data_parse = self.data_parsing(data)
-                user = json.loads(data_parse["user"])
-                userid = user['id']
-                self.log(f"{hijau}login as : {putih}{user['first_name']}")
-                access_token = self.get_local_token(userid)
-                failed_fetch_token = False
-                while True:
-                    if access_token is False:
-                        access_token = self.renew_access_token(data)
+                try:
+                    self.log(f"{hijau}account number - {putih}{no + 1}")
+                    data_parse = self.data_parsing(data)
+                    user = json.loads(data_parse["user"])
+                    userid = user['id']
+                    self.log(f"{hijau}login as : {putih}{user['first_name']}")
+                    access_token = self.get_local_token(userid)
+                    failed_fetch_token = False
+                    while True:
                         if access_token is False:
-                            self.save_failed_token(userid,data)
-                            failed_fetch_token = True
-                            break
-                        self.save_local_token(userid,access_token)
-                    expired = self.is_expired(access_token)
-                    if expired:
-                        access_token = False
+                            access_token = self.renew_access_token(data)
+                            if access_token is False:
+                                self.save_failed_token(userid,data)
+                                failed_fetch_token = True
+                                break
+                            self.save_local_token(userid,access_token)
+                        expired = self.is_expired(access_token)
+                        if expired:
+                            access_token = False
+                            continue
+                        break
+                    if failed_fetch_token:
                         continue
-                    break
-                if failed_fetch_token:
-                    continue
-                self.checkin(access_token)
-                self.get_friend(access_token)
-                if args.autotask:
-                    self.solve_task(access_token)
-                status, res_bal = self.get_balance(access_token)
-                if status:
-                    self.claim_farming(access_token)
-                    res_bal = self.start_farming(access_token)
-                if isinstance(res_bal, str):
-                    res_bal = self.start_farming(access_token)
-                list_countdown.append(res_bal)
-                if args.autogame:
-                    self.playgame(access_token)
-                self.log(self.garis)
-                self.countdown(self.DEFAULT_INTERVAL)
+                    self.checkin(access_token)
+                    self.get_friend(access_token)
+                    if args.autotask:
+                        self.solve_task(access_token)
+                    status, res_bal = self.get_balance(access_token)
+                    if status:
+                        self.claim_farming(access_token)
+                        res_bal = self.start_farming(access_token)
+                    if isinstance(res_bal, str):
+                        res_bal = self.start_farming(access_token)
+                    list_countdown.append(res_bal)
+                    if args.autogame:
+                        self.playgame(access_token)
+                    self.log(self.garis)
+                    self.countdown(self.DEFAULT_INTERVAL)
+                except KeyError:
+                    print("KeyError: 'request blum json has error")
             min_countdown = min(list_countdown)
             now = int(time.time())
             result = min_countdown - now
