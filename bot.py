@@ -63,30 +63,33 @@ class BlumTod:
         headers["Authorization"] = f"Bearer {access_token}"
         res = self.http(url_task, headers)
         for task in res.json():
-            task_id = task["id"]
-            task_title = task["title"]
-            task_status = task["status"]
-            if task_status == "NOT_STARTED":
-                url_start = (
-                    f"https://game-domain.blum.codes/api/v1/tasks/{task_id}/start"
-                )
-                res = self.http(url_start, headers, "")
-                if "message" in res.text:
-                    continue
+            try:
+                task_id = task["id"]
+                task_title = task["title"]
+                task_status = task["status"]
+                if task_status == "NOT_STARTED":
+                    url_start = (
+                        f"https://game-domain.blum.codes/api/v1/tasks/{task_id}/start"
+                    )
+                    res = self.http(url_start, headers, "")
+                    if "message" in res.text:
+                        continue
 
-                url_claim = (
-                    f"https://game-domain.blum.codes/api/v1/tasks/{task_id}/claim"
-                )
-                res = self.http(url_claim, headers, "")
-                if "message" in res.text:
-                    continue
+                    url_claim = (
+                        f"https://game-domain.blum.codes/api/v1/tasks/{task_id}/claim"
+                    )
+                    res = self.http(url_claim, headers, "")
+                    if "message" in res.text:
+                        continue
 
-                status = res.json()["status"]
-                if status == "CLAIMED":
-                    self.log(f"{hijau}success complete task {task_title} !")
-                    continue
+                    status = res.json()["status"]
+                    if status == "CLAIMED":
+                        self.log(f"{hijau}success complete task {task_title} !")
+                        continue
 
-            self.log(f"{kuning}already complete task {task_title} !")
+                self.log(f"{kuning}already complete task {task_title} !")
+            except KeyError:
+                print("KeyError: 'request blum json has error")
 
     def claim_farming(self, access_token):
         url = "https://game-domain.blum.codes/api/v1/farming/claim"
