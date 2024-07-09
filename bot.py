@@ -376,6 +376,7 @@ class BlumTod:
                         self.countdown(self.DEFAULT_INTERVAL)
                     except KeyError:
                         print("KeyError: 'request blum json has error")
+
                 min_countdown = min(list_countdown)
                 now = int(time.time())
                 result = min_countdown - now
@@ -383,6 +384,8 @@ class BlumTod:
                     continue
 
                 self.countdown(result)
+            except KeyboardInterrupt:
+                sys.exit()
             except BaseException as e:
                 print(f"An error occurred: {e}")
 
