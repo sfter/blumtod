@@ -57,39 +57,160 @@ class BlumTod:
         self.log(f"{hijau}success get access token ")
         return access_token
 
-    def solve_task(self, access_token):
-        url_task = "https://game-domain.blum.codes/api/v1/tasks"
-        headers = self.base_headers.copy()
-        headers["Authorization"] = f"Bearer {access_token}"
-        res = self.http(url_task, headers)
-        for task in res.json():
-            try:
-                task_id = task["id"]
-                task_title = task["title"]
-                task_status = task["status"]
-                if task_status == "NOT_STARTED":
-                    url_start = (
-                        f"https://game-domain.blum.codes/api/v1/tasks/{task_id}/start"
-                    )
-                    res = self.http(url_start, headers, "")
-                    if "message" in res.text:
-                        continue
+    def check_tasks(self, token):
+        headers = {
+            'Authorization': f'Bearer {token}',
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en-US,en;q=0.9',
+            'content-length': '0',
+            'origin': 'https://telegram.blum.codes',
+            'priority': 'u=1, i',
+            'sec-ch-ua': '"Microsoft Edge";v="125", "Chromium";v="125", "Not.A/Brand";v="24", "Microsoft Edge WebView2";v="125"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-site',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0'
+        }
+    
+        try:
+            response = requests.get('https://game-domain.blum.codes/api/v1/tasks', headers=headers)
+            if response.status_code == 200:
+                tasks = response.json()
+                for task in tasks:
+                    titlenya = task['title']
+                    print(f"{Fore.YELLOW+Style.BRIGHT}Checking Task: {titlenya} Lists")
+                    taskList = task.get('tasks', [])
+                    for lists in taskList:
+                        task_status = lists.get('status', None)
+                        task_title = lists.get('title', None)
+                        if task_status == 'FINISHED':
+                            print(f"{Fore.CYAN+Style.BRIGHT}Task {task_title} already claimed")
+                        elif task_status == 'NOT_STARTED':
+                            print(f"{Fore.YELLOW+Style.BRIGHT}Starting Task: {task_title}")
+                            self.start_task(token, lists['id'], task_title)
+                            self.claim_task(token, lists['id'], task_title)
+                        # Check for subtasks
+                        subTasks = lists.get('subTasks', [])
+                        for subtask in subTasks:
+                            subtask_status = subtask.get('status', None)
+                            subtask_title = subtask.get('title', None)
+                            if subtask_status == 'NOT_STARTED':
+                                print(f"{Fore.YELLOW+Style.BRIGHT}Starting Subtask: {subtask_title}")
+                                self.start_subtask(token, subtask['id'], subtask_title)
+                                self.claim_subtask(token, subtask['id'], subtask_title)
+            else:
+                print(f"{Fore.RED+Style.BRIGHT}\nFailed to get tasks")
+        except Exception as e:
+            print(f"{Fore.RED+Style.BRIGHT}\nFailed to get tasks Error Code: {response.status_code} | {str(e)}")
 
-                    url_claim = (
-                        f"https://game-domain.blum.codes/api/v1/tasks/{task_id}/claim"
-                    )
-                    res = self.http(url_claim, headers, "")
-                    if "message" in res.text:
-                        continue
+    def start_task(self, token, task_id,titlenya):
+        url = f'https://game-domain.blum.codes/api/v1/tasks/{task_id}/start'
+        headers = {
+            'Authorization': f'Bearer {token}',
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en-US,en;q=0.9',
+            'content-length': '0',
+            'origin': 'https://telegram.blum.codes',
+            'priority': 'u=1, i',
+            'sec-ch-ua': '"Microsoft Edge";v="125", "Chromium";v="125", "Not.A/Brand";v="24", "Microsoft Edge WebView2";v="125"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-site',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0'
+        }
+        try:
+            response = requests.post(url, headers=headers)
+            if response.status_code == 200:
+                print(f"{Fore.GREEN+Style.BRIGHT}\nTask {titlenya} started")
+            else:
+                print(f"{Fore.RED+Style.BRIGHT}\nFailed to start task {titlenya} {response.json()}")
+            return 
+        except:
+            print(f"{Fore.RED+Style.BRIGHT}\nFailed to start task {titlenya} {response.status_code} ")
 
-                    status = res.json()["status"]
-                    if status == "CLAIMED":
-                        self.log(f"{hijau}success complete task {task_title} !")
-                        continue
+    def start_subtask(self, token, subtask_id, title):
+        url = f'https://game-domain.blum.codes/api/v1/tasks/{subtask_id}/start'
+        headers = {
+            'Authorization': f'Bearer {token}',
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en-US,en;q=0.9',
+            'content-length': '0',
+            'origin': 'https://telegram.blum.codes',
+            'priority': 'u=1, i',
+            'sec-ch-ua': '"Microsoft Edge";v="125", "Chromium";v="125", "Not.A/Brand";v="24", "Microsoft Edge WebView2";v="125"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-site',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0'
+        }
+        try:
+            response = requests.post(url, headers=headers)
+            if response.status_code == 200:
+                print(f"{Fore.GREEN+Style.BRIGHT}\nSubtask {title} started")
+            else:
+                print(f"{Fore.RED+Style.BRIGHT}\nFailed to start subtask {title} {response.json()}")
+        except Exception as e:
+            print(f"{Fore.RED+Style.BRIGHT}\nFailed to start subtask {title} due to error: {str(e)}")
 
-                self.log(f"{kuning}already complete task {task_title} !")
-            except KeyError:
-                print("KeyError: 'request blum json has error")
+    def claim_subtask(self, token, subtask_id, title):
+        print(f"{Fore.YELLOW+Style.BRIGHT}\nClaiming subtask {title}")
+        url = f'https://game-domain.blum.codes/api/v1/tasks/{subtask_id}/claim'
+        headers = {
+            'Authorization': f'Bearer {token}',
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en-US,en;q=0.9',
+            'content-length': '0',
+            'origin': 'https://telegram.blum.codes',
+            'priority': 'u=1, i',
+            'sec-ch-ua': '"Microsoft Edge";v="125", "Chromium";v="125", "Not.A/Brand";v="24", "Microsoft Edge WebView2";v="125"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-site',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0'
+        }
+        try:
+            response = requests.post(url, headers=headers)
+            if response.status_code == 200:
+                print(f"{Fore.CYAN+Style.BRIGHT}\nSubtask {title} claimed")
+            else:
+                print(f"{Fore.RED+Style.BRIGHT}\nFailed to claim subtask {title}")
+        except Exception as e:
+            print(f"{Fore.RED+Style.BRIGHT}\nFailed to claim subtask {title} due to error: {str(e)}")
+
+    def claim_task(self, token, task_id,titlenya):
+        print(f"{Fore.YELLOW+Style.BRIGHT}\nClaiming task {titlenya}")
+        url = f'https://game-domain.blum.codes/api/v1/tasks/{task_id}/claim'
+        headers = {
+            'Authorization': f'Bearer {token}',
+            'accept': 'application/json, text/plain, */*',
+            'accept-language': 'en-US,en;q=0.9',
+            'content-length': '0',
+            'origin': 'https://telegram.blum.codes',
+            'priority': 'u=1, i',
+            'sec-ch-ua': '"Microsoft Edge";v="125", "Chromium";v="125", "Not.A/Brand";v="24", "Microsoft Edge WebView2";v="125"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-site',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0'
+        }
+        try:
+            response = requests.post(url, headers=headers)
+            if response.status_code == 200:
+                print(f"{Fore.CYAN+Style.BRIGHT}\nTask {titlenya} claimed")
+            else:
+                print(f"{Fore.RED+Style.BRIGHT}\nFailed to claim task {titlenya}")
+        except:
+            print(f"{Fore.RED+Style.BRIGHT}\nFailed to claim task {titlenya} {response.status_code} ")
 
     def claim_farming(self, access_token):
         url = "https://game-domain.blum.codes/api/v1/farming/claim"
@@ -362,7 +483,7 @@ class BlumTod:
                         self.checkin(access_token)
                         self.get_friend(access_token)
                         if args.autotask:
-                            self.solve_task(access_token)
+                            self.check_tasks(access_token)
                         status, res_bal = self.get_balance(access_token)
                         if status:
                             self.claim_farming(access_token)
