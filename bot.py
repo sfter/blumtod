@@ -77,29 +77,22 @@ class BlumTod:
         try:
             response = requests.get('https://game-domain.blum.codes/api/v1/tasks', headers=headers)
             if response.status_code == 200:
-                tasks = response.json()
-                for task in tasks:
-                    titlenya = task['title']
-                    print(f"{Fore.YELLOW+Style.BRIGHT}Checking Task: {titlenya} Lists")
-                    taskList = task.get('tasks', [])
-                    for lists in taskList:
-                        task_status = lists.get('status', None)
-                        task_title = lists.get('title', None)
-                        if task_status == 'FINISHED':
-                            print(f"{Fore.CYAN+Style.BRIGHT}Task {task_title} already claimed")
-                        elif task_status == 'NOT_STARTED':
-                            print(f"{Fore.YELLOW+Style.BRIGHT}Starting Task: {task_title}")
-                            self.start_task(token, lists['id'], task_title)
-                            self.claim_task(token, lists['id'], task_title)
-                        # Check for subtasks
-                        subTasks = lists.get('subTasks', [])
-                        for subtask in subTasks:
-                            subtask_status = subtask.get('status', None)
-                            subtask_title = subtask.get('title', None)
-                            if subtask_status == 'NOT_STARTED':
-                                print(f"{Fore.YELLOW+Style.BRIGHT}Starting Subtask: {subtask_title}")
-                                self.start_subtask(token, subtask['id'], subtask_title)
-                                self.claim_subtask(token, subtask['id'], subtask_title)
+                jsons = response.json()
+                for json in jsons:
+                    subSections = json.get('subSections', [])
+                    for subSection in subSections:
+                        titlenya = subSection.get('title', None)
+                        print(f"{Fore.YELLOW+Style.BRIGHT}Checking Task: {titlenya} Lists")
+                        taskList = subSection.get('tasks', [])
+                        for lists in taskList:
+                            task_status = lists.get('status', None)
+                            task_title = lists.get('title', None)
+                            if task_status == 'FINISHED':
+                                print(f"{Fore.CYAN+Style.BRIGHT}Task {task_title} already claimed")
+                            elif task_status == 'NOT_STARTED':
+                                print(f"{Fore.YELLOW+Style.BRIGHT}Starting Task: {task_title}")
+                                self.start_task(token, lists['id'], task_title)
+                                self.claim_task(token, lists['id'], task_title)
             else:
                 print(f"{Fore.RED+Style.BRIGHT}\nFailed to get tasks")
         except Exception as e:
