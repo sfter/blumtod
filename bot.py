@@ -75,7 +75,7 @@ class BlumTod:
         }
     
         try:
-            response = requests.get('https://game-domain.blum.codes/api/v1/tasks', headers=headers)
+            response = requests.get('https://earn-domain.blum.codes/api/v1/tasks', headers=headers)
             if response.status_code == 200:
                 jsons = response.json()
                 for json in jsons:
@@ -99,7 +99,7 @@ class BlumTod:
             print(f"{Fore.RED+Style.BRIGHT}\nFailed to get tasks Error Code: {response.status_code} | {str(e)}")
 
     def start_task(self, token, task_id,titlenya):
-        url = f'https://game-domain.blum.codes/api/v1/tasks/{task_id}/start'
+        url = f'https://earn-domain.blum.codes/api/v1/tasks/{task_id}/start'
         headers = {
             'Authorization': f'Bearer {token}',
             'accept': 'application/json, text/plain, */*',
@@ -126,7 +126,7 @@ class BlumTod:
             print(f"{Fore.RED+Style.BRIGHT}\nFailed to start task {titlenya} {response.status_code} ")
 
     def start_subtask(self, token, subtask_id, title):
-        url = f'https://game-domain.blum.codes/api/v1/tasks/{subtask_id}/start'
+        url = f'https://earn-domain.blum.codes/api/v1/tasks/{subtask_id}/start'
         headers = {
             'Authorization': f'Bearer {token}',
             'accept': 'application/json, text/plain, */*',
@@ -153,7 +153,7 @@ class BlumTod:
 
     def claim_subtask(self, token, subtask_id, title):
         print(f"{Fore.YELLOW+Style.BRIGHT}\nClaiming subtask {title}")
-        url = f'https://game-domain.blum.codes/api/v1/tasks/{subtask_id}/claim'
+        url = f'https://earn-domain.blum.codes/api/v1/tasks/{subtask_id}/claim'
         headers = {
             'Authorization': f'Bearer {token}',
             'accept': 'application/json, text/plain, */*',
@@ -180,7 +180,7 @@ class BlumTod:
 
     def claim_task(self, token, task_id,titlenya):
         print(f"{Fore.YELLOW+Style.BRIGHT}\nClaiming task {titlenya}")
-        url = f'https://game-domain.blum.codes/api/v1/tasks/{task_id}/claim'
+        url = f'https://earn-domain.blum.codes/api/v1/tasks/{task_id}/claim'
         headers = {
             'Authorization': f'Bearer {token}',
             'accept': 'application/json, text/plain, */*',
@@ -474,7 +474,7 @@ class BlumTod:
                         if failed_fetch_token:
                             continue
                         self.checkin(access_token)
-                        self.get_friend(access_token)
+                        # self.get_friend(access_token)
                         if args.autotask:
                             self.check_tasks(access_token)
                         status, res_bal = self.get_balance(access_token)
@@ -488,7 +488,8 @@ class BlumTod:
                             self.playgame(access_token)
                         self.log(self.garis)
                         self.countdown(self.DEFAULT_INTERVAL)
-                    except KeyError:
+                    except KeyError as e:
+                        self.log(str(e))
                         print("KeyError: 'request blum json has error")
 
                 min_countdown = min(list_countdown)
