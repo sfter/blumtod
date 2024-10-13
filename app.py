@@ -94,7 +94,7 @@ class Blum:
                     response.raise_for_status()
                     generate_token = await response.json()
                     user_data = json.loads(parse_qs(query)['user'][0])
-                    first_name = user_data['first_name'] if user_data['first_name'] == '' else user_data['username']
+                    first_name = user_data.get('first_name') if user_data.get('first_name') == '' else user_data.get('username')
                     return (generate_token['token']['refresh'], first_name)
         except (Exception, ClientResponseError) as e:
             self.print_timestamp(
@@ -523,6 +523,14 @@ class Blum:
                     await self.tasks(token=token)
                     user_balance = await self.user_balance(token=token)
                     total_balance += int(float(user_balance['availableBalance'])) if user_balance else 0
+
+                # for (token, username) in accounts:
+                #     self.print_timestamp(
+                #         f"{Fore.WHITE + Style.BRIGHT}[ Tasks ]{Style.RESET_ALL}"
+                #         f"{Fore.WHITE + Style.BRIGHT} | {Style.RESET_ALL}"
+                #         f"{Fore.CYAN + Style.BRIGHT}[ {username} ]{Style.RESET_ALL}"
+                #     )
+                #     await self.play_game(token=token)
 
                 if restart_times:
                     future_farming_times = [time - datetime.now().astimezone().timestamp() for time in restart_times if time > datetime.now().astimezone().timestamp()]
